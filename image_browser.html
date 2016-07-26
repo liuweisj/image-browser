@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>图片浏览</title>
+
+    <link type="text/css" rel="stylesheet" href="css/style.css"/>
+
+    <script src="js/modernizr.custom.js"></script>
+</head>
+<body>
+<div id="overlay"></div>
+<div id="imageDetail">
+</div>
+<div>
+    <ul class="grid effect-1" id="grid">
+
+    </ul>
+</div>
+
+<script src="js/jquery.min.js"></script>
+<script src="js/masonry.pkgd.min.js"></script>
+<script src="js/imagesloaded.js"></script>
+<script src="js/classie.js"></script>
+<script src="js/AnimOnScroll.js"></script>
+<script>
+    //require("masonry-layout");
+    let $ = require("jquery");
+
+    let itemWidth,columnNum=7,outWidth = $("body").outerWidth(),curShow,isShow;
+    itemWidth = outWidth/7
+
+    $(function () {
+        $(".grid-item").width(itemWidth);
+    })
+    require('electron').ipcRenderer.on('image-msg', function(event, message) {
+        let imgURL = message.imageURL
+        let img = $('<li><img src="'+imgURL+'"  from="'+message.from+'"/></li>');
+
+        img.on("click",function () {
+            let _this = $(this);
+            showImage(imgURL);
+        })
+        $("#grid").append(img);
+
+        new AnimOnScroll( document.getElementById('grid'), {
+            minDuration : 0.4,
+            maxDuration : 0.7,
+            viewportFactor : 0.2
+        });
+    });
+
+    function showImage(imgURL) {
+        if(isShow)return;
+        isShow = true;
+        $("#overlay").height(pageHeight());
+        $("#overlay").width(pageWidth());
+
+        $("#overlay").fadeTo(200, 0.5);
+        $('body').css("overflow","hidden")
+        $("#imageDetail").append('<img class="auto" src="'+imgURL+'">')
+        $("#imageDetail").css("top",($("body").scrollTop()));
+        $("#imageDetail").show()
+    }
+
+    function close() {
+        $("#overlay").fadeOut(200);
+        $('body').css("overflow","auto")
+        $("#imageDetail").empty();
+        $("#imageDetail").hide();
+        isShow = false;
+    }
+
+    /* 当前页面高度 */
+    function pageHeight() {
+        return document.body.scrollHeight;
+    }
+
+    /* 当前页面宽度 */
+    function pageWidth() {
+        return document.body.scrollWidth;
+    }
+
+    $("#imageDetail").on("dblclick","img",function () {
+        let _this = $(this);
+        if(_this.hasClass("auto")){
+            isChange = true;
+            _this.removeClass("auto")
+            _this.addClass("height-max")
+        }else if(_this.hasClass("height-max")){
+            _this.removeClass("height-max")
+            _this.addClass("width-max")
+        }else if(_this.hasClass("width-max")){
+            _this.removeClass("width-max")
+            _this.addClass("auto")
+        }else {
+            _this.addClass("auto")
+        }
+    })
+    function zoom(val) {
+        let width = $("#imageDetail img").width();
+        width += width*val;
+        $("#imageDetail img").width(width)
+    }
+    $(document).keydown(function (e) {
+        console.log(e.keyCode)
+        if(e.keyCode==27){
+
+        }
+        switch (e.keyCode){
+            case 27:
+                close();
+                break;
+            case 187:
+                zoom(0.1)
+                break
+            case 189:
+                zoom(-0.1)
+                break
+        }
+    })
+
+</script>
+</body>
+</html>

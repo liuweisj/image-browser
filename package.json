@@ -1,0 +1,15 @@
+{
+  "name": "Image browser",
+  "version": "1.0.0",
+  "description": "Image browser",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron-prebuilt": "^1.2.0",
+    "cheerio":"^0.20.0",
+    "jquery":"2.1.3",
+    "masonry-layout":"^4.1.0"
+  }
+}
