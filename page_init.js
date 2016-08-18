@@ -29,8 +29,15 @@
             let cheerio = require("cheerio");
             let http = require("http");
             http.get(imageURL,function (res) {
-                res.on("data",function (chunk) {
-                    if(!chunk)return;
+                let datas = [];
+                let size = 0;
+                res.on('data', function (data) {
+                    datas.push(data);
+                    size += data.length;
+                });
+                res.on("end", function () {
+                    let buff = Buffer.concat(datas, size);
+                    let chunk = buff.toString()
                     let $ = cheerio.load(chunk);
                     let reg = new RegExp(/(\d*\/\d*)/);
                     let text =$(".pageheader h2").html()
@@ -41,7 +48,8 @@
                     let imgURL = $(".IMG_show").attr("src");
                     let rst = {"pages":num,imgURL:imgURL}
                     resolve(rst);
-                })
+                });
+
             })
         });
     }
