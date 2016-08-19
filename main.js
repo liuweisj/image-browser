@@ -23,8 +23,9 @@ function createWindow () {
 
   // and load the index.html of the app.
   //mainWindow.loadURL(`file://${__dirname}/index.html`)
-  mainWindow.loadURL("http://www.youzi4.cc/")
+  //mainWindow.loadURL("http://www.youzi4.cc/")
   browserWindw.loadURL(`file://${__dirname}/image_browser.html`)
+  mainWindow.loadURL(`file://${__dirname}/image_url_input.html`)
   //console.log(`file://${__dirname}/index.html`)
   let pageInitScriptFile = `${__dirname}/page_init.js`;
   let appPath = app.getPath("appData")+"/com.grant.image.browser";
@@ -35,8 +36,9 @@ function createWindow () {
     fs.mkdirSync(appPath+"/download")
   }
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools()
   browserWindw.webContents.openDevTools()
+
   let webContents = mainWindow.webContents;
   const filter ={
   urls:[
@@ -52,7 +54,6 @@ function createWindow () {
   webContents.on("did-get-response-details",function () {
     webContents.executeJavaScript("require('"+pageInitScriptFile+"');window.imageMatch.init()");
   });
-
   //mainWindow.webContents.executeJavaScript("require(`file://${__dirname}/image_match.js`)");
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {

@@ -26,7 +26,7 @@
 <script>
     //require("masonry-layout");
     let $ = require("jquery");
-
+    let imageHistory = new Set();
     let itemWidth,columnNum=7,outWidth = $("body").outerWidth(),curShow,isShow;
     itemWidth = outWidth/7
 
@@ -35,10 +35,13 @@
     })
     require('electron').ipcRenderer.on('image-msg', function(event, message) {
         let imgURL = message.imageURL
+        if(imageHistory.has(imgURL))return;
+        imageHistory.add(imgURL)
         let img = $('<li><img src="'+imgURL+'"  from="'+message.from+'"/></li>');
 
         img.on("click",function () {
             let _this = $(this);
+            curShow = _this;
             showImage(imgURL);
         })
         $("#grid").append(img);
@@ -53,12 +56,13 @@
     function showImage(imgURL) {
         if(isShow)return;
         isShow = true;
+
         $("#overlay").height(pageHeight());
         $("#overlay").width(pageWidth());
 
         $("#overlay").fadeTo(200, 0.5);
         $('body').css("overflow","hidden")
-        $("#imageDetail").append('<img class="auto" src="'+imgURL+'">')
+        $("#imageDetail").append('<img class="height-max" src="'+imgURL+'">')
         $("#imageDetail").css("top",($("body").scrollTop()));
         $("#imageDetail").show()
     }
@@ -69,6 +73,7 @@
         $("#imageDetail").empty();
         $("#imageDetail").hide();
         isShow = false;
+        curShow = null;
     }
 
     /* 当前页面高度 */
@@ -99,17 +104,45 @@
     })
     function zoom(val) {
         let width = $("#imageDetail img").width();
+        let tmp = width;
         width += width*val;
+        if(tmp<100&&width<tmp){
+            return;
+        }
         $("#imageDetail img").width(width)
+        $("#imageDetail img").height("auto");
+
+    }
+    function previousImg() {
+        if(isShow&&curShow){
+            let target = curShow.prev();
+            if(target.size()>0){
+                close();
+                target.trigger("click");
+            }
+        }
+    }
+    function nextImg() {
+        if(isShow&&curShow){
+            let target = curShow.next();
+            if(target.size()>0){
+                close();
+                target.trigger("click");
+            }
+        }
     }
     $(document).keydown(function (e) {
         console.log(e.keyCode)
-        if(e.keyCode==27){
 
-        }
         switch (e.keyCode){
             case 27:
                 close();
+                break;
+            case 37:
+                previousImg()
+                break;
+            case 39:
+                nextImg()
                 break;
             case 187:
                 zoom(0.1)
